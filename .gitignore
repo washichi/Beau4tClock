@@ -1,3 +1,13 @@
+# Docs
+docs/PRESENT.md
+docs/present.odt
+
+# VSCode
+.vscode
+
+# Build
+.pio
+
 # Prerequisites
 *.d
 
@@ -30,3 +40,4 @@
 *.exe
 *.out
 *.app
+
