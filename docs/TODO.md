@@ -5,3 +5,7 @@
 5. use webserver fields
 3. Add features
  * show clock time
+
+ - map minutes to hourHand.
+    currently:  08:00 --> led @8 is bright
+                08:00

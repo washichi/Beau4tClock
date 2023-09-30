@@ -1,4 +1,6 @@
 #include "ledstrip.h"
+#include "globals.h"
+#include "gpio.h"
 
 CRGB leds[NUM_LEDS];
 
@@ -54,3 +56,88 @@ const char *colorMap[] = {
     "0x900028",  // 48
     "0x98003C",  // 49
     "0xA00050"}; // 50
+
+void ledstrip_init()
+{
+  //@todo get pin from ui >> config.pinLEDstrip
+  FastLED.addLeds<WS2812B, PIN_LEDSTRIP_DI, GRB>(leds, NUM_LEDS);
+  // FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);
+  FastLED.setBrightness(round(config.brightnessPercentage * 2.55));
+  FastLED.clear(true);
+  FastLED.show();
+
+  ledBootAnimation();
+}
+
+void blinkIP(String ipAddress)
+{
+  for (char x : ipAddress)
+  {
+    FastLED.clear();
+    FastLED.show();
+    delay(500);
+
+    if (x == '.')
+    {
+      for (int i = 0; i < NUM_LEDS; i++)
+      {
+        leds[i] = CRGB::White;
+      }
+      FastLED.setBrightness(20);
+      FastLED.show();
+    }
+    else
+    {
+      leds[(int(x - '0') * LEDS_PER_HOUR) - 1] = CRGB::White;
+      FastLED.setBrightness(255);
+      FastLED.show();
+      FastLED.show();
+    }
+    delay(1500);
+  }
+
+  FastLED.setBrightness(round(config.brightnessPercentage * 2.55));
+  FastLED.clear();
+  FastLED.show();
+}
+
+void ledBootAnimation()
+{
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    int windspeed = round(i * 1.42857); // map windspeed colors to led
+    leds[i] = strtol(colorMap[windspeed], NULL, 0);
+    FastLED.show();
+    delay(75);
+  }
+
+  ledFadeOut(35, 75);
+}
+
+/**
+ * Reduce the brightness of an array of pixels all at once.
+ * This function will eventually fade all the way to black.
+ * @param fadeBy how much to fade each LED
+ * @param delayMs delay between fade steps
+ */
+void ledFadeOut(int fadeBy, int delayMs)
+{
+  for (int i = 1; i < fadeBy; i++)
+  {
+    fadeToBlackBy(leds, NUM_LEDS, i); // 64/255 = 25%
+    FastLED.show();
+    delay(delayMs);
+  }
+}
+
+void projectForecastColors(int *knotsNext12h)
+{
+  LEDS.clear();
+  for (int i = 0; i < 12; i++)
+  {
+    Serial.print("ledIndex: " + String(((i + 1) * LEDS_PER_HOUR) - 2));
+    Serial.print("windspeed: " + String(knotsNext12h[i]));
+    Serial.println();
+    leds[((i + 1) * LEDS_PER_HOUR) - 2] = strtol(colorMap[knotsNext12h[i]], NULL, 0);
+  }
+}

@@ -1,31 +1,31 @@
 #include "web.h"
-
+#include "debug.h"
 
 #define PORTAL_TIMEOUT_SEC 60
-//WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
+
 WiFiManager wm;
 
 
 
-void web_init()
+String web_init()
 {
-    // wm.resetSettings();
-    bool res;
-    res = wm.autoConnect("Beau4tClock", "12345678");
-    if (!res)
+    WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
+
+    wm.setConfigPortalTimeout(PORTAL_TIMEOUT_SEC);
+    wm.setDebugOutput(false);
+
+    WiFi.hostname("Beau4tClock");
+    WiFi.setHostname("Beau4tClock");
+
+    if (!wm.autoConnect("Beau4tClock", "12345678"))
     {
         Serial.println(F("Failed to connect"));
         //  ESP.restart();
     }
+    //wm.resetSettings();
 
-    wifi_station_set_hostname("Beau4tClock");
-    //wm.hostname("Beau4tClock");
-    WiFi.setHostname("Beau4tClock");
-
-    // wm.resetSettings();
-
-    wm.setConfigPortalTimeout(PORTAL_TIMEOUT_SEC);
-    wm.setDebugOutput(false);
+/*
+    Serial.println("XXX -1- XXX");
     if (!wm.startConfigPortal("Beau4tClock", "12345678"))
     {
         Serial.println(F("failed to connect and hit timeout"));
@@ -33,6 +33,8 @@ void web_init()
         ESP.restart();
         delay(5000);
     }
+    Serial.println("XXX -2- XXX");
+ */
 
     Serial.println(F("\n\nconnected..."));
     Serial.print(F("Hostname: "));
@@ -40,4 +42,9 @@ void web_init()
     Serial.print(F("   IP: "));
     Serial.println(WiFi.localIP());
     Serial.println();
+
+    return WiFi.localIP().toString();
+}
+
+void server_init(){
 }

@@ -9,6 +9,11 @@
 #define WEBSERVER_H
 #include "ESPAsyncWebServer.h"
 
-void web_init(void);
+
+#ifndef DEBUG
+    #define PORTAL_TIMEOUT_SEC 60
+#endif
+
+String web_init(void);
 
 #endif
