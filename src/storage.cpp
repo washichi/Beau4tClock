@@ -1,5 +1,4 @@
 #include "storage.h"
-#include <LittleFS.h>
 #include <EEPROM.h>
 #include "globals.h"
 
@@ -70,5 +69,5 @@ void storage_init()
     address += sizeof(config.brightnessPercentage);
 
     Serial.println(F("Config loaded:"));
-    
+
 }

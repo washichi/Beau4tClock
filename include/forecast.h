@@ -13,7 +13,8 @@ typedef struct
 
 typedef struct
 {
-  const char *date;
+  //const char *date;
+  int day;
   hour_type_t hours[24];
 } day_type_t;
 

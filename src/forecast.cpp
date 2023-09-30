@@ -65,13 +65,10 @@ int getChunkyForecast()
             Serial.println(error.f_str());
             return EXIT_FAILURE;
         }
-        else
-        {
-            Serial.print(F("deserializeJson() succesful: "));
-            Serial.println(error.f_str());
-        }
 
-        forecast.days[dayIndex].date = doc["date"].as<const char *>();
+        //forecast.days[dayIndex].date = doc["date"].as<const char *>();
+        sscanf(doc["date"].as<const char *>(), "%*[^,], %*s %d", &forecast.days[dayIndex].day);
+
 
         JsonArray hours = doc["hours"];
         for (JsonObject hour : hours)
@@ -82,25 +79,22 @@ int getChunkyForecast()
 
             hourIndex++;
         }
-
         dayIndex++;
     } while (client.findUntil(",", "]"));
     client.stop();
 
+    Serial.println(String(hourIndex) + "Hours counted, for the "+ String(dayIndex) + " dates: ");
     for (int i = 0; i < dayIndex; i++)
     {
-        Serial.println(forecast.days[i].date);
+        Serial.print(forecast.days[i].day + ", ");
     }
-    Serial.println("\t" + String(hourIndex) + "Hours counted.");
+    Serial.println();
 
     return EXIT_SUCCESS;
 }
 
 int *getKnotsNext12h(int currentDay, int currentHour)
 {
-    // currentDay += 1; //+1 because date doesnt start with 0
-    Serial.println("CurrentDay = " + String(currentDay) + ", CurrentHour = " + String(currentHour));
-    
     static int knotsNext12h[12];
 
     int knotsAllHours[NUM_HOURS * NUM_DAYS];
@@ -108,17 +102,16 @@ int *getKnotsNext12h(int currentDay, int currentHour)
     int currentHourIndex = 0;
     for (int i = 0; i < NUM_DAYS; i++)
     {
-        int day;
-        sscanf(forecast.days[i].date, "%*[^,], %*s %d", &day);
-        Serial.println("::: " + String(forecast.days[i].date) + "; " + String(day));
+        //int day;
+        //sscanf(forecast.days[i].date, "%*[^,], %*s %d", &day);
         for (int j = 0; j < NUM_HOURS; j++)
         {
             knotsAllHours[allHoursIndex] = forecast.days[i].hours[j].windspeed;
-            if (currentDay == day && currentHour == forecast.days[i].hours[j].hour)
+            //Serial.println("CurrentDay = " + String(currentDay) + ", CurrentHour = " + String(currentHour));
+            //Serial.println("ForecastDay = " + String(forecast.days[i].day) + ", ForecastHour = " + String(forecast.days[i].hours[j].hour));
+            if (currentDay == forecast.days[i].day && currentHour == forecast.days[i].hours[j].hour)
             {
                 currentHourIndex = allHoursIndex;
-                Serial.println("CurrentDay = " + String(currentDay) + ", CurrentHour = " + String(currentHour));
-                Serial.println("Day = " + String(day) + ", Hour = " + String(forecast.days[i].hours[j].hour));
                 Serial.println(F("^^^^^^^^^^^^^^^^"));
             }
             allHoursIndex++;
@@ -136,6 +129,8 @@ int *getKnotsNext12h(int currentDay, int currentHour)
         Serial.print(", ");
     }
     Serial.println();
+
+    Serial.println("CurrentDay = " + String(currentDay) + ", CurrentHour = " + String(currentHour));
 
     Serial.println("currentHourIndex = " + String(currentHourIndex));
 
@@ -167,7 +162,7 @@ void printForecast()
         for (int j = 0; j < NUM_HOURS; j++)
         {
             delay(50);
-            Serial.print(forecast.days[i].date);
+            Serial.print(forecast.days[i].day);
             delay(50);
             Serial.print(F("\t"));
             Serial.print(forecast.days[i].hours[j].hour);

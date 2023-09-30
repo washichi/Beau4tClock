@@ -1,7 +1,6 @@
 #ifndef WEB_H
 #define WEB_H
 
-
 #include <WiFiManager.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
@@ -15,5 +14,9 @@
 #endif
 
 String web_init(void);
+void server_init();
+
+static String processor(const String &var);
+static void notFound(AsyncWebServerRequest *request);
 
 #endif

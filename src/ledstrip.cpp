@@ -135,9 +135,11 @@ void projectForecastColors(int *knotsNext12h)
   LEDS.clear();
   for (int i = 0; i < 12; i++)
   {
-    Serial.print("ledIndex: " + String(((i + 1) * LEDS_PER_HOUR) - 2));
-    Serial.print("windspeed: " + String(knotsNext12h[i]));
+    int ledIndex = (((i + 1) * LEDS_PER_HOUR) - 2);
+    Serial.print("Hour " + String(i));
+    Serial.print("\t,ledIndex: " + String(ledIndex));
+    Serial.print(",\twindspeed: " + String(knotsNext12h[i]));
     Serial.println();
-    leds[((i + 1) * LEDS_PER_HOUR) - 2] = strtol(colorMap[knotsNext12h[i]], NULL, 0);
+    leds[ledIndex] = strtol(colorMap[knotsNext12h[i]], NULL, 0);
   }
 }
