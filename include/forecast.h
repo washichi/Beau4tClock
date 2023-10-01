@@ -26,6 +26,7 @@ typedef struct
   day_type_t days[3];
 } forecast_type_t;
 
+void forecast_init();
 int getChunkyForecast();
 int* getKnotsNext12h(int currentDay, int currentHour);
 void printForecast();

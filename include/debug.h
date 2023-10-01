@@ -1,7 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#define DEBUG 1
+//#define DEBUG
 
 #ifdef DEBUG
     #define PORTAL_TIMEOUT_SEC 1

@@ -65,6 +65,7 @@ void ledstrip_init()
   FastLED.setBrightness(round(config.brightnessPercentage * 2.55));
   FastLED.clear(true);
   FastLED.show();
+  FastLED.show();
 
   ledBootAnimation();
 }
@@ -75,6 +76,7 @@ void blinkIP(String ipAddress)
   {
     FastLED.clear();
     FastLED.show();
+    FastLED.show();
     delay(500);
 
     if (x == '.')
@@ -84,6 +86,7 @@ void blinkIP(String ipAddress)
         leds[i] = CRGB::White;
       }
       FastLED.setBrightness(20);
+      FastLED.show();
       FastLED.show();
     }
     else
@@ -99,6 +102,7 @@ void blinkIP(String ipAddress)
   FastLED.setBrightness(round(config.brightnessPercentage * 2.55));
   FastLED.clear();
   FastLED.show();
+  FastLED.show();
 }
 
 void ledBootAnimation()
@@ -108,10 +112,11 @@ void ledBootAnimation()
     int windspeed = round(i * 1.42857); // map windspeed colors to led
     leds[i] = strtol(colorMap[windspeed], NULL, 0);
     FastLED.show();
-    delay(75);
+    FastLED.show();
+    delay(50);
   }
 
-  ledFadeOut(35, 75);
+  ledFadeOut(35, 50);
 }
 
 /**
@@ -126,17 +131,20 @@ void ledFadeOut(int fadeBy, int delayMs)
   {
     fadeToBlackBy(leds, NUM_LEDS, i); // 64/255 = 25%
     FastLED.show();
+    FastLED.show();
     delay(delayMs);
   }
 }
 
-void projectForecastColors(int *knotsNext12h)
+
+
+void projectForecastColors(int knotsNext12h[])
 {
   LEDS.clear();
   for (int i = 0; i < 12; i++)
   {
     int ledIndex = (((i + 1) * LEDS_PER_HOUR) - 2);
-    Serial.print("Hour " + String(i));
+    Serial.print("Hour " + String(i+1));
     Serial.print("\t,ledIndex: " + String(ledIndex));
     Serial.print(",\twindspeed: " + String(knotsNext12h[i]));
     Serial.println();

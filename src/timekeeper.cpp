@@ -4,6 +4,8 @@
 #include "web.h"
 #include "forecast.h"
 
+//#define SHOW_MINUTE_HAND
+
 unsigned long lastNtpUpdateTime = ntpUpdatedateInterval_ms;
 unsigned long lastClockUpdateTime = clockUpdateInterval_ms;
 unsigned long lastForecastUpdateTime = forecastUpdateInterval_ms;
@@ -23,7 +25,8 @@ void timekeeper_init()
   delay(250);
   while (timeClient.update() == false)
   {
-    if(!timeClient.forceUpdate()){
+    if (!timeClient.forceUpdate())
+    {
       Serial.print(F("_ "));
       delay(10 * 1000);
     }
@@ -55,19 +58,31 @@ void timekeeper_init()
 void updateClock()
 {
   time_t epochTime = timeClient.getEpochTime();
-  struct tm *ptm = gmtime((time_t *)&epochTime);
+  const struct tm *ptm = gmtime((time_t *)&epochTime);
   int currentDay = ptm->tm_mday;
   int currentHour = ptm->tm_hour;
   int currentMinute = ptm->tm_min;
 
-  projectForecastColors(getKnotsNext12h(currentDay, currentHour));  
+  // map next 12h to correct clockHour
+  const int *knotsNext12h = getKnotsNext12h(currentDay, currentHour);
+  int ordered12hForecast[12];
+  for (int i = 0; i < 12; i++)
+  {
+    ordered12hForecast[i] = knotsNext12h[((NUM_HOURS - currentHour) + (i+1)) % 12];
+  }
+
+  projectForecastColors(ordered12hForecast);
+  // projectForecastColors(getKnotsNext12h(currentDay, currentHour));
 
   int ledIndexHour = round((currentHour % 12) * LEDS_PER_HOUR) - 2;
   int ledIndexMinute = round(currentMinute * NUM_LEDS / 59);
   leds[ledIndexHour] = CRGB::White;
-  leds[ledIndexMinute] = CRGB::White;
+#ifdef SHOW_MINUTE_HAND
+  leds[ledIndexMinute] = CRGB::Red;
+#endif
   FastLED.show();
   FastLED.show();
+
 
   Serial.print(currentHour);
   Serial.print(F("h, \tledIndex "));

@@ -5,6 +5,21 @@
 
 forecast_type_t forecast;
 
+void forecast_init(){
+    forecast.provider = "windfinder";
+    forecast.spot = "Maasvlakte";
+    forecast.spotId = 4879;
+    for(int i = 0; i < NUM_DAYS; i++){
+        forecast.days[i].day = i + 30;
+        for(int j = 0; j < (NUM_DAYS * NUM_HOURS); j++){
+            forecast.days[i].hours[j % NUM_HOURS].hour = (j % NUM_HOURS);
+            forecast.days[i].hours[j % NUM_HOURS].windspeed = (j * 2) + 12;
+            forecast.days[i].hours[j % NUM_HOURS].winddirectionLetters = "YX";
+        }
+    }
+    //printForecast();
+}
+
 int getChunkyForecast()
 {
     // Connect to server
@@ -57,12 +72,14 @@ int getChunkyForecast()
     do
     {
         // Deserialize the response
-        DynamicJsonDocument doc(1024 * 5);
+        DynamicJsonDocument doc(1024 * 4);
         DeserializationError error = deserializeJson(doc, client); //, DeserializationOption::Filter(filter));
         if (error)
         {
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
+            Serial.println(F("free heap: "));
+            Serial.println(ESP.getFreeHeap());
             return EXIT_FAILURE;
         }
 
@@ -83,10 +100,10 @@ int getChunkyForecast()
     } while (client.findUntil(",", "]"));
     client.stop();
 
-    Serial.println(String(hourIndex) + "Hours counted, for the "+ String(dayIndex) + " dates: ");
+    Serial.print(String(hourIndex) + "Hours counted, for the "+ String(dayIndex) + " dates: ");
     for (int i = 0; i < dayIndex; i++)
     {
-        Serial.print(forecast.days[i].day + ", ");
+        Serial.print(String(forecast.days[i].day) + ", ");
     }
     Serial.println();
 
@@ -112,16 +129,15 @@ int *getKnotsNext12h(int currentDay, int currentHour)
             if (currentDay == forecast.days[i].day && currentHour == forecast.days[i].hours[j].hour)
             {
                 currentHourIndex = allHoursIndex;
-                Serial.println(F("^^^^^^^^^^^^^^^^"));
             }
             allHoursIndex++;
         }
     }
 
     Serial.print(F("knotsAllHours:"));
-    for (int i = 0; i < 72; i++)
+    for (int i = 0; i < (NUM_DAYS * NUM_HOURS); i++)
     {
-        if (i % 24 == 0)
+        if (i % NUM_HOURS == 0)
         {
             Serial.println();
         }
@@ -131,13 +147,12 @@ int *getKnotsNext12h(int currentDay, int currentHour)
     Serial.println();
 
     Serial.println("CurrentDay = " + String(currentDay) + ", CurrentHour = " + String(currentHour));
-
-    Serial.println("currentHourIndex = " + String(currentHourIndex));
+    //Serial.println("currentHourIndex = " + String(currentHourIndex));
 
     Serial.print(F("knotsNext12Hours:\t"));
-    for (int i = currentHourIndex; i < currentHourIndex + 12; i++)
+    for (int i = 0; i < 12; i++)
     {
-        knotsNext12h[i] = knotsAllHours[i]; //(i * 2) + 12;
+        knotsNext12h[i] = knotsAllHours[currentHourIndex + i]; //(i * 2) + 12;
         Serial.print(knotsNext12h[i]);
         Serial.print(", ");
     }

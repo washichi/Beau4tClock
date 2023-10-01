@@ -14,11 +14,12 @@ const char *PARAM_INPUT = "value";
 
 String web_init()
 {
-    WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-
+    WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
+    //wm.resetSettings();
     wm.setConfigPortalTimeout(PORTAL_TIMEOUT_SEC);
     wm.setDebugOutput(false);
 
+    wifi_station_set_hostname("Beau4tClock");
     WiFi.hostname("Beau4tClock");
     WiFi.setHostname("Beau4tClock");
 
@@ -27,7 +28,7 @@ String web_init()
         Serial.println(F("Failed to connect"));
         //  ESP.restart();
     }
-    //wm.resetSettings();
+
 
 /*
     Serial.println("XXX -1- XXX");

@@ -32,6 +32,7 @@ void setup()
     Serial.println(ESP.getChipId());
     Serial.print(F("---------------------------------------------------\n"));
 
+    //forecast_init();
     storage_init();
     ledstrip_init();
     String ipAdress = web_init();
@@ -85,6 +86,7 @@ void loop()
     if (!digitalRead(PIN_BUTTON))
     {
         FastLED.clear();
+        FastLED.show();
         FastLED.show();
         digitalWrite(PIN_LED, !true);
         getChunkyForecast();
