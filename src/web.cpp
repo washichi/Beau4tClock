@@ -14,49 +14,97 @@ const char *PARAM_INPUT = "value";
 
 String web_init()
 {
-    WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
-    //wm.resetSettings();
-    wm.setConfigPortalTimeout(PORTAL_TIMEOUT_SEC);
-    wm.setDebugOutput(false);
+  WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
+  // wm.resetSettings();
+  wm.setConfigPortalTimeout(PORTAL_TIMEOUT_SEC);
+  wm.setDebugOutput(false);
 
-    wifi_station_set_hostname("Beau4tClock");
-    WiFi.hostname("Beau4tClock");
-    WiFi.setHostname("Beau4tClock");
+  wifi_station_set_hostname("Beau4tClock");
+  WiFi.hostname("Beau4tClock");
+  WiFi.setHostname("Beau4tClock");
 
-    if (!wm.autoConnect("Beau4tClock", "12345678"))
-    {
-        Serial.println(F("Failed to connect"));
-        //  ESP.restart();
-    }
+  if (!wm.autoConnect("Beau4tClock", "12345678"))
+  {
+    Serial.println(F("Failed to connect"));
+    //  ESP.restart();
+  }
 
+  /*
+      Serial.println("XXX -1- XXX");
+      if (!wm.startConfigPortal("Beau4tClock", "12345678"))
+      {
+          Serial.println(F("failed to connect and hit timeout"));
+          delay(3000);
+          ESP.restart();
+          delay(5000);
+      }
+      Serial.println("XXX -2- XXX");
+   */
 
-/*
-    Serial.println("XXX -1- XXX");
-    if (!wm.startConfigPortal("Beau4tClock", "12345678"))
-    {
-        Serial.println(F("failed to connect and hit timeout"));
-        delay(3000);
-        ESP.restart();
-        delay(5000);
-    }
-    Serial.println("XXX -2- XXX");
- */
+  Serial.println(F("\n\nconnected..."));
+  Serial.print(F("Hostname: "));
+  Serial.print(WiFi.hostname());
+  Serial.print(F("   IP: "));
+  Serial.println(WiFi.localIP());
+  Serial.println();
 
-    Serial.println(F("\n\nconnected..."));
-    Serial.print(F("Hostname: "));
-    Serial.print(WiFi.hostname());
-    Serial.print(F("   IP: "));
-    Serial.println(WiFi.localIP());
-    Serial.println();
+  server_init();
 
-    //server_init();
-
-
-    return WiFi.localIP().toString();
+  return WiFi.localIP().toString();
 }
 
-void server_init(){
-    // Route for root index.html
+void server_init()
+{
+  // Route for root / web page
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/index.html", "text/html", false, processor); });
+
+  // Route for root style.css
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/style.css", "text/css"); });
+
+  // Route for root index.js
+  server.on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/index.js", "text/javascript"); });
+
+  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/favicon.ico", "image/x-icon"); });
+
+  server.on("/manifest.json", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/manifest.json", "application/json"); });
+
+  server.on("/apple-touch-icon.png", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/apple-touch-icon.png", "image/png"); });
+
+  server.on("/android-chrome-512x512.png", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/android-chrome-512x512.png", "image/png"); });
+
+  server.on("/browserconfig.xml", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/browserconfig.xml", "application/xml"); });
+
+  // Send a GET request to <ESP_IP>/slider?value=<inputMessage>
+  server.on("/fc-brightness", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+              String inputMessage;
+              // GET input1 value on <ESP_IP>/slider?value=<inputMessage>
+              if (request->hasParam(PARAM_INPUT)) {
+                inputMessage = request->getParam(PARAM_INPUT)->value();
+                String sliderValue = inputMessage;
+                Serial.println(sliderValue.toInt());
+              }
+              else {
+                inputMessage = "No message sent";
+              }
+              Serial.println(inputMessage);
+              request->send(200, "text/plain", "OK"); });
+
+  server.onNotFound(notFound);
+
+  // Start server
+  server.begin();
+
+  /*
+  // Route for root index.html
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/index.html", "text/html", false, processor); });
 
@@ -79,16 +127,16 @@ void server_init(){
         if (request->hasParam("status")) {
             status = request->getParam("status")->value();
             if(status == "ON"){
-              //setLED(true);
+              Serial.println(true);
             }else{
-              //setLED(false);
+              Serial.println(false);
             }
         } else {
             status = "No message sent";
         }
         request->send(200, "text/plain", "Turning Built In LED : " + status); });
 
-  // brightness spider
+  // brightness slider
   server.on("/slider", HTTP_GET, [](AsyncWebServerRequest *request)
             {
   String inputMessage;
@@ -124,11 +172,12 @@ void server_init(){
 
   server.onNotFound(notFound);
   server.begin();
+  */
 }
 
-String processor(const String &var)
+static String processor(const String &var)
 {
-  if (var == "SLIDERVALUE")
+  if (var == "FC-BRIGHTNESS")
   {
     return String(config.brightnessPercentage);
   }

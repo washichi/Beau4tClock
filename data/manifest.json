@@ -1,0 +1,14 @@
+{
+    "name": "Beau4tClock",
+    "short_name": "Beau4tClock",
+    "icons": [
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#49a79b",
+    "background_color": "#49a79b",
+    "display": "standalone"
+}

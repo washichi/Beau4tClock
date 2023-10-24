@@ -12,7 +12,8 @@ config_t config = {
     .spot = "maasvlakte",
     .lat = 51.919,
     .lon = 3.984,
-    .brightnessPercentage = 50};
+    .brightnessPercentage = 50,
+    .dimWithSun = true};
 
 void setup()
 {
@@ -32,7 +33,7 @@ void setup()
     Serial.println(ESP.getChipId());
     Serial.print(F("---------------------------------------------------\n"));
 
-    //forecast_init();
+    // forecast_init();
     storage_init();
     ledstrip_init();
     String ipAdress = web_init();
@@ -72,7 +73,7 @@ void loop()
             tries++;
             FastLED.delay(10 * 1000);
         }
-        //printForecast();
+        // printForecast();
     }
 
     if (currentMillis - lastClockUpdateTime >= clockUpdateInterval_ms)

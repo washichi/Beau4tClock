@@ -3,8 +3,9 @@
 #include "ledstrip.h"
 #include "web.h"
 #include "forecast.h"
+#include "globals.h"
 
-//#define SHOW_MINUTE_HAND
+// #define SHOW_MINUTE_HAND
 
 unsigned long lastNtpUpdateTime = ntpUpdatedateInterval_ms;
 unsigned long lastClockUpdateTime = clockUpdateInterval_ms;
@@ -68,21 +69,65 @@ void updateClock()
   int ordered12hForecast[12];
   for (int i = 0; i < 12; i++)
   {
-    ordered12hForecast[i] = knotsNext12h[((NUM_HOURS - currentHour) + (i+1)) % 12];
+    ordered12hForecast[i] = knotsNext12h[((NUM_HOURS - currentHour) + (i + 1)) % 12];
   }
 
   projectForecastColors(ordered12hForecast);
   // projectForecastColors(getKnotsNext12h(currentDay, currentHour));
 
-  int ledIndexHour = round((currentHour % 12) * LEDS_PER_HOUR) - 2;
-  int ledIndexMinute = round(currentMinute * NUM_LEDS / 59);
+  //  newValue = (newValueMax - newValueMin) * (value - valueMin) / (valueMax - valueMin) + newValueMin;
+  int current12hTimeInMinutes = ((currentHour % 12) * 60) + currentMinute;
+  int ledIndexHour = floor(((NUM_LEDS - 1) * current12hTimeInMinutes) / 719);
+  // int ledIndexHour = round((currentHour % 12) * LEDS_PER_HOUR) - 2;
+  // int ledIndexMinute = round(currentMinute * (NUM_LEDS-1) / 59) - 1;
+  int ledIndexMinute = floor(((NUM_LEDS - 1) * currentMinute) / 59);
   leds[ledIndexHour] = CRGB::White;
 #ifdef SHOW_MINUTE_HAND
   leds[ledIndexMinute] = CRGB::Red;
 #endif
-  FastLED.show();
-  FastLED.show();
 
+  if (config.dimWithSun)
+  {
+    int sunrise = static_cast<int>(sun.calcSunrise());
+    int sunset = static_cast<int>(sun.calcSunset());
+    int sunRiseHour = sunrise / 60;
+    int sunRiseMinute = sunrise % 60;
+    int sunSetHour = sunset / 60;
+    int sunSetMinute = sunset % 60;
+
+    int currentTimeInMinutes = (currentHour * 60) + currentMinute; // 24h
+    int sunriseTimeInMinutes = (sunRiseHour * 60) + sunRiseMinute;
+    int sunsetTimeInMinutes = (sunSetHour * 60) + sunSetMinute;
+    Serial.println("currentTimeInMinutes = " + String(currentTimeInMinutes));
+    Serial.println("sunriseTimeInMinutes = " + String(sunriseTimeInMinutes));
+    Serial.println("sunsetTimeInMinutes = " + String(sunsetTimeInMinutes));
+
+    int nightBrightness = 5;
+
+    if (currentTimeInMinutes > sunriseTimeInMinutes && currentTimeInMinutes < sunsetTimeInMinutes)
+    {
+      //DAY, increase slowly to day brightness
+      while (FastLED.getBrightness() < round(config.brightnessPercentage * 2.55))
+      {
+        FastLED.setBrightness(FastLED.getBrightness() + 1);
+        FastLED.show();
+        FastLED.delay(100);
+      }
+    }
+    else
+    {
+      //NIGHT, decrease slowly to night brightness
+      while (FastLED.getBrightness() > nightBrightness)
+      {
+        FastLED.setBrightness(FastLED.getBrightness() - 1);
+        FastLED.show();
+        FastLED.delay(100);
+      }
+    }
+  }
+
+  FastLED.show();
+  FastLED.show();
 
   Serial.print(currentHour);
   Serial.print(F("h, \tledIndex "));
