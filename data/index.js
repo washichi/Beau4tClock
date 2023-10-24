@@ -28,10 +28,10 @@ sliders.forEach(slider => {
   })
 })
 
-form.addEventListener('input', e => {
-  const formData = Object.fromEntries(new FormData(form))
-  console.table(formData)
-})
+// form.addEventListener('input', e => {
+//   const formData = Object.fromEntries(new FormData(form))
+//   console.table(formData)
+// })
 
 function updateFCBrightness(element) {
   var sliderValue = document.getElementById("fc-brightness").value;

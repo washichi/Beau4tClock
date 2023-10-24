@@ -103,12 +103,14 @@ void updateClock()
     Serial.println("sunsetTimeInMinutes = " + String(sunsetTimeInMinutes));
 
     int nightBrightness = 5;
+    config.brightnessPercentage = 50;
 
     if (currentTimeInMinutes > sunriseTimeInMinutes && currentTimeInMinutes < sunsetTimeInMinutes)
     {
       //DAY, increase slowly to day brightness
       while (FastLED.getBrightness() < round(config.brightnessPercentage * 2.55))
       {
+        Serial.println(FastLED.getBrightness());
         FastLED.setBrightness(FastLED.getBrightness() + 1);
         FastLED.show();
         FastLED.delay(100);
