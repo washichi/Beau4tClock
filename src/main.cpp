@@ -6,18 +6,24 @@
 #include "timekeeper.h"
 #include "storage.h"
 #include "debug.h"
+#include "update.h"
+
 
 config_t config = {
     .provider = "windfinder",
     .spot = "maasvlakte",
     .lat = 51.919,
     .lon = 3.984,
-    .brightnessPercentage = 50,
-    .dimWithSun = true};
+    .dimWithSun = true,
+    .dayBrightness = 50,
+    .nightBrightness = 0,
+    .offThreshold = 12, 
+};
 
 void setup()
 {
     Serial.begin(115200);
+    config.dayBrightness = 50;
 
 #ifdef DEBUG
     pinMode(PIN_BUTTON, INPUT_PULLUP);
@@ -33,13 +39,12 @@ void setup()
     Serial.println(ESP.getChipId());
     Serial.print(F("---------------------------------------------------\n"));
 
-    // forecast_init();
+    updateFirmware(); //@todo first connect to wifi?
+
     storage_init();
     ledstrip_init();
     String ipAdress = web_init();
-#ifndef DEBUG
     blinkIP(ipAdress);
-#endif
     timekeeper_init();
 
     // forecast_init();

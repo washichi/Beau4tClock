@@ -10,13 +10,16 @@ void storage_init()
         return;
     }
 
+    Serial.println(F(" XXXXXXXXXXXX NO EEPROM R/W for now, reading not correct, so config will be garbage XXXXXXXXXXXX")); //@todo
+    return;
+
     // eeprom
     EEPROM.begin(512);
 
     int address = 0;
     int initializeFlag = 0;
 
-    Serial.println(config.provider);
+
 
     EEPROM.get(address, initializeFlag);
     if (initializeFlag != 1)
@@ -39,8 +42,8 @@ void storage_init()
         EEPROM.put(address, config.lon);
         address += sizeof(config.lon);
 
-        EEPROM.put(address, config.brightnessPercentage);
-        address += sizeof(config.brightnessPercentage);
+        EEPROM.put(address, config.dayBrightness);
+        address += sizeof(config.dayBrightness);
 
         EEPROM.commit();
     }
@@ -65,9 +68,9 @@ void storage_init()
     EEPROM.get(address, config.lon);
     address += sizeof(config.lon);
 
-    EEPROM.get(address, config.brightnessPercentage);
-    address += sizeof(config.brightnessPercentage);
+    EEPROM.get(address, config.dayBrightness);
+    address += sizeof(config.dayBrightness);
 
-    Serial.println(F("Config loaded:"));
+    Serial.println(F("Config loaded FROM EEPROM."));
 
 }

@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include "web.h"
 #include "globals.h"
+#include "secrets.h"
 
 forecast_type_t forecast;
 
@@ -30,25 +31,22 @@ int getChunkyForecast()
     client.setTimeout(60 * 1000);
     client.setSSLVersion(BR_TLS10);
     client.setInsecure(); // This is for testing purposes, you should use a secure connection
-    client.connect("forecast.homespot.dev", 443);
+    client.connect(SERVER_HOSTNAME, 443);
 
-    //@todo somehow I can't access my config.* so now I use hardcoded provider & spot.
-    Serial.println("OOOOOOOOOOOOOO");
     // Serial.println(config.brightnessPercentage);
-    const char *provider = "windfinder";
-    const char *spot = "Maasvlakte";
+    // const char *provider = "windfinder";
+    // const char *spot = "Maasvlakte";
     //@todo also get from json, in a elegant way.
-    forecast.provider = provider;
-    forecast.spot = spot;
-    Serial.println("XXXXXXXXXXXX");
+    forecast.provider = config.provider;
+    forecast.spot = config.spot;
 
-    // HTTPS GET requiest
+    // HTTPS GET request
     char request[128] = "/data?provider=";
-    strlcat(request, provider, sizeof(request));
+    strlcat(request, forecast.provider, sizeof(request));
     strlcat(request, "&spotname=", sizeof(request));
-    strlcat(request, spot, sizeof(request));
+    strlcat(request, forecast.spot, sizeof(request));
     client.println("GET " + String(request) + " HTTP/1.0");
-    client.println("Host: forecast.homespot.dev");
+    client.println("Host: " + String(SERVER_HOSTNAME));
     client.println("Connection: close");
     client.println();
 

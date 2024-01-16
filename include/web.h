@@ -9,14 +9,14 @@
 #include "ESPAsyncWebServer.h"
 
 
-#ifndef DEBUG
-    #define PORTAL_TIMEOUT_SEC 60
-#endif
+// #ifndef DEBUG
+//     #define PORTAL_TIMEOUT_SEC 30
+// #endif
 
 String web_init(void);
 void server_init();
 
-static String processor(const String &var);
-static void notFound(AsyncWebServerRequest *request);
+//static String processor(const String &var);
+//static void notFound(AsyncWebServerRequest *request);
 
 #endif

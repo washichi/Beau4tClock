@@ -7,11 +7,13 @@
 
 // #define SHOW_MINUTE_HAND
 
+static String twoDigits(int digits);
+
 unsigned long lastNtpUpdateTime = ntpUpdatedateInterval_ms;
 unsigned long lastClockUpdateTime = clockUpdateInterval_ms;
 unsigned long lastForecastUpdateTime = forecastUpdateInterval_ms;
 
-int utcOffsetHours = 2;
+int utcOffsetHours = 1;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 // Define NTP Client to get time
@@ -24,12 +26,16 @@ void timekeeper_init()
 {
   timeClient.begin();
   delay(250);
+  int tryCounter = 0;
   while (timeClient.update() == false)
   {
     if (!timeClient.forceUpdate())
     {
       Serial.print(F("_ "));
-      delay(10 * 1000);
+      delay(1000);
+      tryCounter++;
+
+      if(tryCounter > 50){ ESP.restart();}
     }
   }
   Serial.println();
@@ -56,6 +62,32 @@ void timekeeper_init()
   Serial.println(F("pm\n"));
 }
 
+bool isDaytime(int currentHour, int currentMinute)
+{
+  int sunrise = static_cast<int>(sun.calcSunrise());
+  int sunset = static_cast<int>(sun.calcSunset());
+  int sunRiseHour = sunrise / 60;
+  int sunRiseMinute = sunrise % 60;
+  int sunSetHour = sunset / 60;
+  int sunSetMinute = sunset % 60;
+
+  int currentTimeInMinutes = (currentHour * 60) + currentMinute; // 24h
+  int sunriseTimeInMinutes = (sunRiseHour * 60) + sunRiseMinute;
+  int sunsetTimeInMinutes = (sunSetHour * 60) + sunSetMinute;
+  Serial.println("currentTimeInMinutes = " + String(currentTimeInMinutes));
+  Serial.println("sunriseTimeInMinutes = " + String(sunriseTimeInMinutes));
+  Serial.println("sunsetTimeInMinutes = " + String(sunsetTimeInMinutes));
+
+  if (currentTimeInMinutes > sunriseTimeInMinutes && currentTimeInMinutes < sunsetTimeInMinutes)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 void updateClock()
 {
   time_t epochTime = timeClient.getEpochTime();
@@ -75,11 +107,12 @@ void updateClock()
   projectForecastColors(ordered12hForecast);
   // projectForecastColors(getKnotsNext12h(currentDay, currentHour));
 
-  //  newValue = (newValueMax - newValueMin) * (value - valueMin) / (valueMax - valueMin) + newValueMin;
+  ////  newValue = (newValueMax - newValueMin) * (value - valueMin) / (valueMax - valueMin) + newValueMin;
   int current12hTimeInMinutes = ((currentHour % 12) * 60) + currentMinute;
-  int ledIndexHour = floor(((NUM_LEDS - 1) * current12hTimeInMinutes) / 719);
-  // int ledIndexHour = round((currentHour % 12) * LEDS_PER_HOUR) - 2;
-  // int ledIndexMinute = round(currentMinute * (NUM_LEDS-1) / 59) - 1;
+  //old int ledIndexHour = floor(((NUM_LEDS - 1) * current12hTimeInMinutes) / 719);
+  int ledIndexHour = round(((currentHour % 12) * LEDS_PER_HOUR)) - 2;
+  //int ledIndexHour = ((((currentHour % 12) + 1) * LEDS_PER_HOUR) - 2);
+  //// int ledIndexMinute = round(currentMinute * (NUM_LEDS-1) / 59) - 1;
   int ledIndexMinute = floor(((NUM_LEDS - 1) * currentMinute) / 59);
   leds[ledIndexHour] = CRGB::White;
 #ifdef SHOW_MINUTE_HAND
@@ -88,41 +121,25 @@ void updateClock()
 
   if (config.dimWithSun)
   {
-    int sunrise = static_cast<int>(sun.calcSunrise());
-    int sunset = static_cast<int>(sun.calcSunset());
-    int sunRiseHour = sunrise / 60;
-    int sunRiseMinute = sunrise % 60;
-    int sunSetHour = sunset / 60;
-    int sunSetMinute = sunset % 60;
+    // TODO override whoulkd not be required
+    config.dayBrightness = 50;
+    config.nightBrightness = 1;
 
-    int currentTimeInMinutes = (currentHour * 60) + currentMinute; // 24h
-    int sunriseTimeInMinutes = (sunRiseHour * 60) + sunRiseMinute;
-    int sunsetTimeInMinutes = (sunSetHour * 60) + sunSetMinute;
-    Serial.println("currentTimeInMinutes = " + String(currentTimeInMinutes));
-    Serial.println("sunriseTimeInMinutes = " + String(sunriseTimeInMinutes));
-    Serial.println("sunsetTimeInMinutes = " + String(sunsetTimeInMinutes));
-
-    int nightBrightness = 5;
-    config.brightnessPercentage = 50;
-
-    if (currentTimeInMinutes > sunriseTimeInMinutes && currentTimeInMinutes < sunsetTimeInMinutes)
+    if (isDaytime(currentHour, currentMinute) == true)
     {
-      //DAY, increase slowly to day brightness
-      while (FastLED.getBrightness() < round(config.brightnessPercentage * 2.55))
+      // DAY, increase slowly to day brightness
+      while (FastLED.getBrightness() < round(config.dayBrightness * 2.55))
       {
-        Serial.println(FastLED.getBrightness());
         FastLED.setBrightness(FastLED.getBrightness() + 1);
-        FastLED.show();
         FastLED.delay(100);
       }
     }
     else
     {
-      //NIGHT, decrease slowly to night brightness
-      while (FastLED.getBrightness() > nightBrightness)
+      // NIGHT, decrease slowly to night brightness
+      while (FastLED.getBrightness() > round(config.nightBrightness * 2.55))
       {
         FastLED.setBrightness(FastLED.getBrightness() - 1);
-        FastLED.show();
         FastLED.delay(100);
       }
     }

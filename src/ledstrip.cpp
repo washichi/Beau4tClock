@@ -1,6 +1,7 @@
 #include "ledstrip.h"
 #include "globals.h"
 #include "gpio.h"
+#include "debug.h"
 
 CRGB leds[NUM_LEDS];
 
@@ -62,7 +63,7 @@ void ledstrip_init()
   //@todo get pin from ui >> config.pinLEDstrip
   FastLED.addLeds<WS2812B, PIN_LEDSTRIP_DI, GRB>(leds, NUM_LEDS);
   // FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);
-  FastLED.setBrightness(round(config.brightnessPercentage * 2.55));
+  FastLED.setBrightness(int(config.dayBrightness * 2.55));
   FastLED.clear(true);
   FastLED.show();
   FastLED.show();
@@ -72,10 +73,13 @@ void ledstrip_init()
 
 void blinkIP(String ipAddress)
 {
+  int blinkDelay = 500;
+#ifdef DEBUG
+  blinkDelay = 50;
+#endif
   for (char x : ipAddress)
   {
     FastLED.clear();
-    FastLED.show();
     FastLED.show();
     delay(500);
 
@@ -87,19 +91,17 @@ void blinkIP(String ipAddress)
       }
       FastLED.setBrightness(20);
       FastLED.show();
-      FastLED.show();
     }
     else
     {
       leds[(int(x - '0') * LEDS_PER_HOUR) - 1] = CRGB::White;
       FastLED.setBrightness(255);
       FastLED.show();
-      FastLED.show();
     }
-    delay(1500);
+    delay(blinkDelay*3);
   }
 
-  FastLED.setBrightness(round(config.brightnessPercentage * 2.55));
+  FastLED.setBrightness(round(config.dayBrightness * 2.55));
   FastLED.clear();
   FastLED.show();
   FastLED.show();
@@ -136,15 +138,13 @@ void ledFadeOut(int fadeBy, int delayMs)
   }
 }
 
-
-
 void projectForecastColors(int knotsNext12h[])
 {
   LEDS.clear();
   for (int i = 0; i < 12; i++)
   {
     int ledIndex = (((i + 1) * LEDS_PER_HOUR) - 2);
-    Serial.print("Hour " + String(i+1));
+    Serial.print("Hour " + String(i + 1));
     Serial.print("\t,ledIndex: " + String(ledIndex));
     Serial.print(",\twindspeed: " + String(knotsNext12h[i]));
     Serial.println();

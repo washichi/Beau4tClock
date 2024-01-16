@@ -17,6 +17,6 @@ extern NTPClient timeClient;
 void timekeeper_init();
 void updateClock();
 
-static String twoDigits(int digits);
+//static String twoDigits(int digits);
 
 #endif
