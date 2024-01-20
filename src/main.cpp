@@ -16,7 +16,7 @@ config_t config = {
     .lon = 3.984,
     .dimWithSun = true,
     .dayBrightness = 50,
-    .nightBrightness = 0,
+    .nightBrightness = 5,
     .offThreshold = 12, 
 };
 

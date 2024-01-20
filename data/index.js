@@ -52,9 +52,9 @@ function setInitialSliderValue(sliderId, sliderValueLabelId, fetchUrl, updateFun
 }
 
 window.onload = function () {
-setInitialSliderValue("sliderFcBrMin", "textSliderValue", '/getSliderValueFcBrMin', updateSliderFcBrMin);
-setInitialSliderValue("sliderFcBrMax", "textSliderValue", '/getSliderValueFcBrMax', updateSliderFcBrMax);
-setInitialSliderValue("sliderKnots", "textSliderValue", '/getSliderValueKnots', updateSliderKnots);
+setInitialSliderValue("sliderFcBrMin", "textSliderValueFcBrMin", '/getSliderValueFcBrMin', updateSliderFcBrMin);
+setInitialSliderValue("sliderFcBrMax", "textSliderValueFcBrMax", '/getSliderValueFcBrMax', updateSliderFcBrMax);
+setInitialSliderValue("sliderKnots", "textSliderValueKnots", '/getSliderValueKnots', updateSliderKnots);
 }
 
 const rangeToPercent = slider => {
@@ -111,14 +111,10 @@ function onCountryChange() {
 }
 
 function buttonUpdateClick() {
+  console.log("buttonUpdateClick");
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "/update", true);
   xhr.send();
-}
-
-function buttonRebootClick() {
-  // Your code for the 'Reboot' button click
-  console.log("Reboot button clicked!");
 }
 
 function buttonResetClick() {
@@ -127,13 +123,13 @@ function buttonResetClick() {
 
   // Check the user's choice
   if (userConfirmed) {
+      console.log("buttonResetClick & confirmed");
       // Handle the 'Yes' (OK) click
-      handleResetButtonClick();
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/reset", true);
+      xhr.send();
   } 
 }
-
-
-
 
 
 $(document).ready(function () {

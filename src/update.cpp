@@ -11,7 +11,7 @@ void updateFirmware()
 {
   Serial.println(F(":::: updateFirmware ::::"));
 
-  
+
   WiFiClientSecure client;
   client.setTimeout(60 * 1000);
   client.setSSLVersion(BR_TLS10);
@@ -34,6 +34,8 @@ void updateFirmware()
   ESPhttpUpdate.rebootOnUpdate(false); // remove automatic update
 
   Serial.println(F("Update start now!"));
+
+  //forecast.homespot.dev/update?chipid=580705&type=firmware&currentversion=0.0.3
 
   String updateUrl = "/update?chipid=" + String(ESP.getChipId()) + "&type=firmware&currentversion=" + FIRMWARE_VERSION;
   t_httpUpdate_return ret = ESPhttpUpdate.update(client, SERVER_HOSTNAME, 443, updateUrl);

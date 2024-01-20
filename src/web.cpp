@@ -92,14 +92,12 @@ void server_init()
 
   // sliderFcBrMin ###############################################################
   server.on("/sliderFcBrMin", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
+            {          
     String inputMessage;
-    // GET input1 value on <ESP_IP>/slider?value=<inputMessage>
     if (request->hasParam(PARAM_INPUT)) {
       inputMessage = request->getParam(PARAM_INPUT)->value();
       config.nightBrightness = inputMessage.toInt();
-      //updateBrightness()
-      //FastLED.setBrightness(round(inputMessage.toInt() *  2.55));
+      updateBrightness();
     }
     else {
       inputMessage = "No message sent";
@@ -114,12 +112,10 @@ void server_init()
   server.on("/sliderFcBrMax", HTTP_GET, [](AsyncWebServerRequest *request)
             {
     String inputMessage;
-    // GET input1 value on <ESP_IP>/slider?value=<inputMessage>
     if (request->hasParam(PARAM_INPUT)) {
       inputMessage = request->getParam(PARAM_INPUT)->value();
       config.dayBrightness = inputMessage.toInt();
-      //updateBrightness()
-      //FastLED.setBrightness(round(inputMessage.toInt() *  2.55));
+      updateBrightness();
     }
     else {
       inputMessage = "No message sent";
@@ -134,88 +130,38 @@ void server_init()
   server.on("/sliderKnots", HTTP_GET, [](AsyncWebServerRequest *request)
             {
     String inputMessage;
-    // GET input1 value on <ESP_IP>/slider?value=<inputMessage>
     if (request->hasParam(PARAM_INPUT)) {
       inputMessage = request->getParam(PARAM_INPUT)->value();
       config.offThreshold = inputMessage.toInt();
-      //updateBrightness()
-      //FastLED.setBrightness(round(inputMessage.toInt() *  2.55));
+      //updateLeds //@todo
     }
     else {
       inputMessage = "No message sent";
     }
     request->send(200, "text/plain", "OK"); });
 
-  server.on("/getSliderKnots", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(200, "text/plain", String(config.offThreshold)); });
+  server.on("/getSliderValueKnots", HTTP_GET, [](AsyncWebServerRequest *request)
+            { D_println("/getSliderValueKnots");
+              request->send(200, "text/plain", String(config.offThreshold)); });
   // ###############################################################################
 
   server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request)
-            { updateFirmware(); 
-            updateFileSystem();});
+            {
+              request->send(200, "text/plain", "OK"); 
+            updateFirmware(); 
+            updateFileSystem(); });
+
+  server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request)
+            { Serial.println("/reset received");
+            request->send(200, "text/plain", "OK"); });
 
   server.onNotFound(notFound);
   server.begin();
-
-  /*
-  // Respond to toggle event
-  server.on("/toggle", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
-        String status;
-        if (request->hasParam("status")) {
-            status = request->getParam("status")->value();
-            if(status == "ON"){
-              Serial.println(true);
-            }else{
-              Serial.println(false);
-            }
-        } else {
-            status = "No message sent";
-        }
-        request->send(200, "text/plain", "Turning Built In LED : " + status); });
-
-  // brightness slider
-  server.on("/slider", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
-  String inputMessage;
-  // GET input1 value on <ESP_IP>/slider?value=<inputMessage>
-  if (request->hasParam(PARAM_INPUT)) {
-    inputMessage = request->getParam(PARAM_INPUT)->value();
-    config.dayBrightness = inputMessage.toInt();
-    FastLED.setBrightness(round(config.dayBrightness * 2.55));
-    FastLED.show();
-    FastLED.show();
-
-
-  }
-  request->send(200, "text/plain", "OK"); });
-
-  // Send a GET request to <ESP_IP>/slider?value=<inputMessage>
-  server.on("/setSpot", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
-  String inputMessage;
-  if (request->hasParam(PARAM_INPUT)) {
-    inputMessage = request->getParam(PARAM_INPUT)->value();
-    //@todo first validate if valid latlon
-    String spotLatLonText = inputMessage;
-    //Serial.print(F("spotLatLon = "));
-    //Serial.println(spotLatLonText);
-    //@todo validate if number & then update var lat lon
-  }
-  else {
-    inputMessage = "No message sent";
-  }
-  //Serial.println(inputMessage);
-  request->send(200, "text/plain", "OK"); });
-
-  server.onNotFound(notFound);
-  server.begin();
-  */
 }
 
 static String processor(const String &var)
 {
-  // Serial.println(":::: processor: " + var);
+  D_println("::::::::::: processor : " + var);
   if (var == "SLIDERVALUEFCBRMIN")
   {
     return String(config.nightBrightness);
@@ -224,13 +170,13 @@ static String processor(const String &var)
   {
     return String(config.dayBrightness);
   }
-  else if (var == "SLIDERVALUKNOTS")
+  else if (var == "SLIDERVALUEKNOTS")
   {
     return String(config.offThreshold);
   }
   else if (var == "SPOTNAME")
   {
-    return config.spot;
+    return String(config.spot);
   }
   else if (var == "SPOTLATLON")
   {

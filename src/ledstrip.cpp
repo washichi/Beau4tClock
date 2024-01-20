@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "gpio.h"
 #include "debug.h"
+#include "timekeeper.h"
 
 CRGB leds[NUM_LEDS];
 
@@ -58,6 +59,21 @@ const char *colorMap[] = {
     "0x98003C",  // 49
     "0xA00050"}; // 50
 
+void updateBrightness()
+{
+  if (isDaytime() == true)
+  {
+    FastLED.setBrightness(round(config.dayBrightness * 2.55));
+  }
+  else
+  {
+    FastLED.setBrightness(round(config.nightBrightness * 2.55));
+  }
+
+  FastLED.show();
+  FastLED.show();
+}
+
 void ledstrip_init()
 {
   //@todo get pin from ui >> config.pinLEDstrip
@@ -98,7 +114,7 @@ void blinkIP(String ipAddress)
       FastLED.setBrightness(255);
       FastLED.show();
     }
-    delay(blinkDelay*3);
+    delay(blinkDelay * 3);
   }
 
   FastLED.setBrightness(round(config.dayBrightness * 2.55));

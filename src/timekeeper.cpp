@@ -5,6 +5,8 @@
 #include "forecast.h"
 #include "globals.h"
 
+#define TAG "TIMEKEEPER"
+
 // #define SHOW_MINUTE_HAND
 
 static String twoDigits(int digits);
@@ -35,7 +37,10 @@ void timekeeper_init()
       delay(1000);
       tryCounter++;
 
-      if(tryCounter > 50){ ESP.restart();}
+      if (tryCounter > 50)
+      {
+        ESP.restart();
+      }
     }
   }
   Serial.println();
@@ -62,8 +67,14 @@ void timekeeper_init()
   Serial.println(F("pm\n"));
 }
 
-bool isDaytime(int currentHour, int currentMinute)
+bool isDaytime()
 {
+  time_t epochTime = timeClient.getEpochTime();
+  const struct tm *ptm = gmtime((time_t *)&epochTime);
+  int currentDay = ptm->tm_mday;
+  int currentHour = ptm->tm_hour;
+  int currentMinute = ptm->tm_min;
+
   int sunrise = static_cast<int>(sun.calcSunrise());
   int sunset = static_cast<int>(sun.calcSunset());
   int sunRiseHour = sunrise / 60;
@@ -80,12 +91,11 @@ bool isDaytime(int currentHour, int currentMinute)
 
   if (currentTimeInMinutes > sunriseTimeInMinutes && currentTimeInMinutes < sunsetTimeInMinutes)
   {
+    D_println("Its daytime!!!!");
     return true;
   }
-  else
-  {
-    return false;
-  }
+  D_println("Its nighttime!!!!");
+  return false;
 }
 
 void updateClock()
@@ -109,9 +119,9 @@ void updateClock()
 
   ////  newValue = (newValueMax - newValueMin) * (value - valueMin) / (valueMax - valueMin) + newValueMin;
   int current12hTimeInMinutes = ((currentHour % 12) * 60) + currentMinute;
-  //old int ledIndexHour = floor(((NUM_LEDS - 1) * current12hTimeInMinutes) / 719);
+  // old int ledIndexHour = floor(((NUM_LEDS - 1) * current12hTimeInMinutes) / 719);
   int ledIndexHour = round(((currentHour % 12) * LEDS_PER_HOUR)) - 2;
-  //int ledIndexHour = ((((currentHour % 12) + 1) * LEDS_PER_HOUR) - 2);
+  // int ledIndexHour = ((((currentHour % 12) + 1) * LEDS_PER_HOUR) - 2);
   //// int ledIndexMinute = round(currentMinute * (NUM_LEDS-1) / 59) - 1;
   int ledIndexMinute = floor(((NUM_LEDS - 1) * currentMinute) / 59);
   leds[ledIndexHour] = CRGB::White;
@@ -121,11 +131,8 @@ void updateClock()
 
   if (config.dimWithSun)
   {
-    // TODO override whoulkd not be required
-    config.dayBrightness = 50;
-    config.nightBrightness = 1;
 
-    if (isDaytime(currentHour, currentMinute) == true)
+    if (isDaytime() == true)
     {
       // DAY, increase slowly to day brightness
       while (FastLED.getBrightness() < round(config.dayBrightness * 2.55))

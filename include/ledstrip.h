@@ -10,6 +10,7 @@
 extern CRGB leds[NUM_LEDS];
 
 void ledstrip_init();
+void updateBrightness();
 void blinkIP(String ipAddress);
 void ledBootAnimation();
 void projectForecastColors(int knotsNext12h[]);
