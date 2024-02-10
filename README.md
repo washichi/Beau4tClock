@@ -42,7 +42,9 @@ Note that on power up for a few minutes the WiFi portal will be reachable, you  
 
 ### Preview
 
-<img src="docs/images/mobile-mockup-dark.png" alt="Bea4tClock" width="250" style="border-radius: 0px;"/>
-<img src="docs/images/mobile-mockup-light.png" alt="Bea4tClock" width="250" style="border-radius: 0px;"/>
+<div style="display: flex;">
+  <img src="docs/images/mobile-mockup-dark.png" alt="Dark Theme" width="250" style="border-radius: 0px; margin-right: 10px;">
+  <img src="docs/images/mobile-mockup-light.png" alt="Light Theme" width="250" style="border-radius: 0px;">
+</div>
 <br>
 <img src="docs/images/macbook-mockup.png" alt="Bea4tClock" width="600" style="border-radius: 0px;"/>
