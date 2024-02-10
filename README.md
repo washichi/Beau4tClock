@@ -1,5 +1,8 @@
 # Beau4tClock
-Clock that displays wind forecast using LED strip. 
+Clock that projects the windforecast for the next 12 hours.
+
+<img src="docs/images/low_forecast+windfinder.png" alt="Bea4tClock" width="400" style="border-radius: 25px;"/>
+
 
 ## Features
 - Configure WiFi using portal
@@ -7,7 +10,7 @@ Clock that displays wind forecast using LED strip.
 - Select weather provider (Windfinder, Windguru, Windguru-Pro, Windy)
 - Set timezone
 - Set LED brightness
-- Set amount of LEDs
+- Dim clock with the sun
 
 ## Components
 - Clock 
@@ -37,10 +40,9 @@ If an issue occurs you can always press the RESET button to reboot the device.<b
 Your WiFi credentials are stored permanent, if the device can't connect to the WiFi it will go into AccessPoint mode again. <br>
 Note that on power up for a few minutes the WiFi portal will be reachable, you  can change the WiFi configuration there. 
 
-### LED  status indicator
-__BLUE__: During setup, this can take a few minutes. <br>
-__BLINK__: Device is setup but there is an issue on the device or the server providing the weatherdata. <br>
-__OFF__: Device is completely setup and working as expected.
+### Preview
 
-### LED Ring modes
-__BLUE_SWEEP__: 
+<img src="docs/images/mobile-mockup-dark.png" alt="Bea4tClock" width="250" style="border-radius: 0px;"/>
+<img src="docs/images/mobile-mockup-light.png" alt="Bea4tClock" width="250" style="border-radius: 0px;"/>
+<br>
+<img src="docs/images/macbook-mockup.png" alt="Bea4tClock" width="600" style="border-radius: 0px;"/>

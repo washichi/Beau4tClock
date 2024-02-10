@@ -59,6 +59,7 @@ const char *colorMap[] = {
     "0x98003C",  // 49
     "0xA00050"}; // 50
 
+
 void updateBrightness()
 {
   if (isDaytime() == true)
@@ -164,6 +165,8 @@ void projectForecastColors(int knotsNext12h[])
     Serial.print("\t,ledIndex: " + String(ledIndex));
     Serial.print(",\twindspeed: " + String(knotsNext12h[i]));
     Serial.println();
-    leds[ledIndex] = strtol(colorMap[knotsNext12h[i]], NULL, 0);
+    if(knotsNext12h[i] > config.offThreshold){
+        leds[ledIndex] = strtol(colorMap[knotsNext12h[i]], NULL, 0);
+    }
   }
 }

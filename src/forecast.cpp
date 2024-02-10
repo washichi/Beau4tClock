@@ -31,6 +31,7 @@ int getChunkyForecast()
     client.setTimeout(60 * 1000);
     client.setSSLVersion(BR_TLS10);
     client.setInsecure(); // This is for testing purposes, you should use a secure connection
+
     client.connect(SERVER_HOSTNAME, 443);
 
     // Serial.println(config.brightnessPercentage);
@@ -76,10 +77,10 @@ int getChunkyForecast()
         {
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
-            Serial.println(F("free heap: "));
-            Serial.println(ESP.getFreeHeap());
             return EXIT_FAILURE;
         }
+        Serial.print(F("free heap: "));
+        Serial.println(ESP.getFreeHeap());
 
         //forecast.days[dayIndex].date = doc["date"].as<const char *>();
         sscanf(doc["date"].as<const char *>(), "%*[^,], %*s %d", &forecast.days[dayIndex].day);

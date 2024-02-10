@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "ledstrip.h"
 #include "update.h"
+#include "timekeeper.h"
 
 #define PORTAL_TIMEOUT_SEC 30
 
@@ -53,6 +54,10 @@ String web_init()
   Serial.println();
 
   server_init();
+
+  while(WiFi.status() != WL_CONNECTED){
+    Serial.println(F("x"));
+  }
 
   return WiFi.localIP().toString();
 }
@@ -133,7 +138,7 @@ void server_init()
     if (request->hasParam(PARAM_INPUT)) {
       inputMessage = request->getParam(PARAM_INPUT)->value();
       config.offThreshold = inputMessage.toInt();
-      //updateLeds //@todo
+      updateClock();
     }
     else {
       inputMessage = "No message sent";
@@ -141,8 +146,7 @@ void server_init()
     request->send(200, "text/plain", "OK"); });
 
   server.on("/getSliderValueKnots", HTTP_GET, [](AsyncWebServerRequest *request)
-            { D_println("/getSliderValueKnots");
-              request->send(200, "text/plain", String(config.offThreshold)); });
+            { request->send(200, "text/plain", String(config.offThreshold)); });
   // ###############################################################################
 
   server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request)

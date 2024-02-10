@@ -6,7 +6,6 @@ var timezone_json = {"BD": [{"tzid": "Asia/Dhaka", "name": "Bangladesh"}], "BE":
 //   console.table(formData)
 // })
 
-//const sliders = document.querySelectorAll('input[type="range"]')
 const toggleButton = document.getElementById('theme-toggle');
 const sliders = document.querySelectorAll('input[type="range"]')
 
@@ -39,7 +38,7 @@ function setInitialSliderValue(sliderId, sliderValueLabelId, fetchUrl, updateFun
       sliderValueLabel.innerHTML = defaultValue;
 
       // Make the initial request to update the slider value on the server
-      updateFunction(slider);
+      //updateFunction(slider);
     })
     .catch(error => {
       console.error('Error fetching slider value:', error);

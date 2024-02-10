@@ -15,9 +15,9 @@ config_t config = {
     .lat = 51.919,
     .lon = 3.984,
     .dimWithSun = true,
-    .dayBrightness = 50,
-    .nightBrightness = 5,
-    .offThreshold = 12, 
+    .dayBrightness = 25,
+    .nightBrightness = 0,
+    .offThreshold = 0, 
 };
 
 void setup()
@@ -39,14 +39,13 @@ void setup()
     Serial.println(ESP.getChipId());
     Serial.print(F("---------------------------------------------------\n"));
 
-    updateFirmware(); //@todo first connect to wifi?
-
     storage_init();
     ledstrip_init();
     String ipAdress = web_init();
     blinkIP(ipAdress);
     timekeeper_init();
 
+    updateFirmware(); 
     // forecast_init();
 
     digitalWrite(PIN_LED, !false);

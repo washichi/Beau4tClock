@@ -1,6 +1,5 @@
-# Docs
-docs/PRESENT.md
-docs/present.odt
+#temp files
+*.bak
 
 # Secrets
 */secrets.h
