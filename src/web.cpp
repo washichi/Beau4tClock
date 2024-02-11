@@ -38,7 +38,6 @@ String web_init()
     Serial.println(F("Failed to connect with known credentials."));
   }
 
-  
   if (!wm.startConfigPortal("Beau4tClock", "12345678"))
   {
     Serial.println(F("failed to connect and hit timeout"));
@@ -202,7 +201,15 @@ static void notFound(AsyncWebServerRequest *request)
   request->send(404, "text/plain", "Not found");
 }
 
-void webProcess()
+void web_process()
 {
   wm.process();
+}
+
+void reset_web(){
+  WiFi.disconnect(true);
+  wm.resetSettings();
+
+  // Remove WiFi credentials
+  ESP.eraseConfig();
 }

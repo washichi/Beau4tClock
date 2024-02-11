@@ -14,17 +14,11 @@ void handleRSTButtonPress()
 {
     Serial.println("RST button pressed");
     delay(2000);
-    WiFi.disconnect(true);
+    reset_web();
+    //reset_nvs();
+    //reset_fs();
 
-    WiFiManager wm;
-    wm.resetSettings();
-
-    WiFi.disconnect(true);
-    // Remove WiFi credentials
-    ESP.eraseConfig();
     ESP.reset();
-
-    // Reboot the device
     ESP.restart();
 }
 
