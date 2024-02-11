@@ -24,8 +24,30 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", 3600 * utcOffsetHours);
 
 SunSet sun;
 
+struct tm getDateTime(){
+    // Set time via NTP, as required for x.509 validation
+  configTime(3600 * utcOffsetHours+1, 0, "pool.ntp.org", "time.nist.gov");
+
+  Serial.print("Waiting for NTP time sync: ");
+  time_t now = time(nullptr);
+  while (now < 8 * 3600 * 2)
+  {
+    delay(500);
+    Serial.print(".");
+    now = time(nullptr);
+  }
+  Serial.println("");
+  struct tm timeInfo;
+  gmtime_r(&now, &timeInfo);
+  Serial.print("Current time: ");
+  Serial.print(asctime(&timeInfo));
+  
+  return timeInfo;
+}
+
 void timekeeper_init()
 {
+  /*
   timeClient.begin();
   delay(250);
   int tryCounter = 0;
@@ -65,6 +87,21 @@ void timekeeper_init()
   Serial.print(F(":"));
   Serial.print(twoDigits(sunset % 60));
   Serial.println(F("pm\n"));
+  */
+
+  struct tm timeInfo = getDateTime();
+  time_t now = time(nullptr);
+  gmtime_r(&now, &timeInfo);
+  Serial.print("Current time: ");
+  Serial.print(asctime(&timeInfo));
+
+  Serial.println(timeInfo.tm_year);
+  Serial.println(timeInfo.tm_mday);
+   Serial.println(timeInfo.tm_mday);
+  Serial.println(timeInfo.tm_hour);
+  Serial.println(timeInfo.tm_min);
+  Serial.println(timeInfo.tm_sec);
+  Serial.println(timeInfo.tm_isdst);
 }
 
 bool isDaytime()

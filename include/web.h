@@ -10,5 +10,6 @@
 
 String web_init(void);
 void server_init();
+void webProcess();
 
 #endif

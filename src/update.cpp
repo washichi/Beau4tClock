@@ -48,25 +48,10 @@ void updateFirmware()
   Serial.println(F(":::: updateFirmware ::::"));
   Serial.setDebugOutput(true);
   //
-  // Set time via NTP, as required for x.509 validation
-  configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
 
-  Serial.print("Waiting for NTP time sync: ");
-  time_t now = time(nullptr);
-  while (now < 8 * 3600 * 2)
-  {
-    delay(500);
-    //Serial.print(".");
-    now = time(nullptr);
-  }
-  Serial.println("");
-  struct tm timeinfo;
-  gmtime_r(&now, &timeinfo);
-  Serial.print("Current time: ");
-  Serial.print(asctime(&timeinfo));
-  //
+  // tm timeInfo = getDateTime();
 
-    // Create a list of certificates with the server certificate
+  // Create a list of certificates with the server certificate
   X509List cert(IRG_Root_X1);
 
   WiFiClientSecure client;
@@ -74,10 +59,12 @@ void updateFirmware()
 
   client.setTrustAnchors(&cert);
 
-
   HTTPClient https;
-  https.setTimeout(5UL * 60UL * 1000UL);
-  client.setTimeout(5UL * 60UL * 1000UL);
+  https.setTimeout(15 * 1000);
+  client.setTimeout(15 * 1000);
+
+  Serial.print(F("free heap: "));
+  Serial.println(ESP.getFreeHeap());
 
   String serverUrl = "https://" + String(SERVER_HOSTNAME) + "/update?chipid=" + String(ESP.getChipId()) + "&type=firmware&currentversion=" + FIRMWARE_VERSION;
 
@@ -87,7 +74,13 @@ void updateFirmware()
     Serial.print("Connecting to server: ");
     Serial.println(serverUrl);
 
+    Serial.print(F("free heap: "));
+    Serial.println(ESP.getFreeHeap());
+
     t_httpUpdate_return ret = ESPhttpUpdate.update(client, serverUrl, FIRMWARE_VERSION);
+
+    Serial.print(F("free heap: "));
+    Serial.println(ESP.getFreeHeap());
 
     switch (ret)
     {

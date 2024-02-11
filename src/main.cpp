@@ -8,6 +8,25 @@
 #include "debug.h"
 #include "update.h"
 
+//const int RST_BUTTON_PIN = D0; // GPIO16 - RST button pin
+
+void handleRSTButtonPress()
+{
+    Serial.println("RST button pressed");
+    delay(2000);
+    WiFi.disconnect(true);
+
+    WiFiManager wm;
+    wm.resetSettings();
+
+    WiFi.disconnect(true);
+    // Remove WiFi credentials
+    ESP.eraseConfig();
+    ESP.reset();
+
+    // Reboot the device
+    ESP.restart();
+}
 
 config_t config = {
     .provider = "windfinder",
@@ -16,8 +35,8 @@ config_t config = {
     .lon = 3.984,
     .dimWithSun = true,
     .dayBrightness = 25,
-    .nightBrightness = 0,
-    .offThreshold = 0, 
+    .nightBrightness = 1,
+    .offThreshold = 0,
 };
 
 void setup()
@@ -32,6 +51,8 @@ void setup()
     pinMode(PIN_LED, OUTPUT);
     digitalWrite(PIN_LED, !true);
 
+    pinMode(0, INPUT_PULLUP);
+
     Serial.print(F("\n---------------------------------------------------"));
     Serial.print(F("\nFirmware version:\t"));
     Serial.println(FIRMWARE_VERSION);
@@ -45,8 +66,8 @@ void setup()
     blinkIP(ipAdress);
     timekeeper_init();
 
-    updateFirmware(); 
-    // forecast_init();
+    // updateFirmware();
+    //  forecast_init();
 
     digitalWrite(PIN_LED, !false);
 }
@@ -85,6 +106,16 @@ void loop()
         Serial.println("[[[ ClockUpdate ]]]");
         lastClockUpdateTime = currentMillis;
         updateClock();
+    }
+
+    // Poll the RST button pin
+    if (digitalRead(0) == LOW)
+    {
+        delay(50); // debounce delay
+        if (digitalRead(0) == LOW)
+        {
+            handleRSTButtonPress();
+        }
     }
 
 #ifdef BUTTON_ENABLED

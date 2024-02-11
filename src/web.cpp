@@ -8,6 +8,8 @@
 
 #define PORTAL_TIMEOUT_SEC 30
 
+#include "debug.h"
+
 WiFiManager wm;
 AsyncWebServer server(80);
 
@@ -19,32 +21,37 @@ static void notFound(AsyncWebServerRequest *request);
 
 String web_init()
 {
-  WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
+  WiFiManager wm;
+
+  wifi_station_set_hostname("Beau4tClock");
+  WiFi.hostname("Beau4tClock");
+  WiFi.setHostname("Beau4tClock");
+
+  WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP //WIFI_AP_STA
   wm.setDebugOutput(true);
   // wm.resetSettings();
   wm.setConfigPortalTimeout(PORTAL_TIMEOUT_SEC);
 
-  wifi_station_set_hostname("Beau4tClock");
-  // WiFi.hostname("Beau4tClock");
-  // WiFi.setHostname("Beau4tClock");
-
-  if (!wm.autoConnect("Beau4tClock", "12345678"))
+  bool res = wm.autoConnect("Beau4tClock", "12345678");
+  if (res == 0)
   {
-    Serial.println(F("Failed to connect"));
-    ESP.restart();
+    Serial.println(F("Failed to connect with known credentials."));
   }
 
-  /*
-    Serial.println("XXX -1- XXX");
-    if (!wm.startConfigPortal("Beau4tClock", "12345678"))
+  
+  if (!wm.startConfigPortal("Beau4tClock", "12345678"))
+  {
+    Serial.println(F("failed to connect and hit timeout"));
+    delay(3000);
+    if (res == 0)
     {
-      Serial.println(F("failed to connect and hit timeout"));
-      delay(3000);
       ESP.restart();
-      delay(5000);
     }
-    Serial.println("XXX -2- XXX");
-    */
+  }
+
+  wifi_station_set_hostname("Beau4tClock");
+  WiFi.hostname("Beau4tClock");
+  WiFi.setHostname("Beau4tClock");
 
   Serial.println(F("\n\nconnected..."));
   Serial.print(F("Hostname: "));
@@ -54,10 +61,6 @@ String web_init()
   Serial.println();
 
   server_init();
-
-  while(WiFi.status() != WL_CONNECTED){
-    Serial.println(F("x"));
-  }
 
   return WiFi.localIP().toString();
 }
@@ -197,4 +200,9 @@ static String processor(const String &var)
 static void notFound(AsyncWebServerRequest *request)
 {
   request->send(404, "text/plain", "Not found");
+}
+
+void webProcess()
+{
+  wm.process();
 }

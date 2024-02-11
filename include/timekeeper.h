@@ -17,7 +17,6 @@ extern NTPClient timeClient;
 void timekeeper_init();
 void updateClock();
 bool isDaytime();
-
-//static String twoDigits(int digits);
+tm getDateTime();
 
 #endif

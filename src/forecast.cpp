@@ -6,19 +6,22 @@
 
 forecast_type_t forecast;
 
-void forecast_init(){
+void forecast_init()
+{
     forecast.provider = "windfinder";
     forecast.spot = "Maasvlakte";
     forecast.spotId = 4879;
-    for(int i = 0; i < NUM_DAYS; i++){
+    for (int i = 0; i < NUM_DAYS; i++)
+    {
         forecast.days[i].day = i + 30;
-        for(int j = 0; j < (NUM_DAYS * NUM_HOURS); j++){
+        for (int j = 0; j < (NUM_DAYS * NUM_HOURS); j++)
+        {
             forecast.days[i].hours[j % NUM_HOURS].hour = (j % NUM_HOURS);
             forecast.days[i].hours[j % NUM_HOURS].windspeed = (j * 2) + 12;
             forecast.days[i].hours[j % NUM_HOURS].winddirectionLetters = "YX";
         }
     }
-    //printForecast();
+    // printForecast();
 }
 
 int getChunkyForecast()
@@ -31,6 +34,9 @@ int getChunkyForecast()
     client.setTimeout(60 * 1000);
     client.setSSLVersion(BR_TLS10);
     client.setInsecure(); // This is for testing purposes, you should use a secure connection
+
+    Serial.print(F("free heap: "));
+    Serial.println(ESP.getFreeHeap());
 
     client.connect(SERVER_HOSTNAME, 443);
 
@@ -82,9 +88,8 @@ int getChunkyForecast()
         Serial.print(F("free heap: "));
         Serial.println(ESP.getFreeHeap());
 
-        //forecast.days[dayIndex].date = doc["date"].as<const char *>();
+        // forecast.days[dayIndex].date = doc["date"].as<const char *>();
         sscanf(doc["date"].as<const char *>(), "%*[^,], %*s %d", &forecast.days[dayIndex].day);
-
 
         JsonArray hours = doc["hours"];
         for (JsonObject hour : hours)
@@ -99,7 +104,7 @@ int getChunkyForecast()
     } while (client.findUntil(",", "]"));
     client.stop();
 
-    Serial.print(String(hourIndex) + "Hours counted, for the "+ String(dayIndex) + " dates: ");
+    Serial.print(String(hourIndex) + "Hours counted, for the " + String(dayIndex) + " dates: ");
     for (int i = 0; i < dayIndex; i++)
     {
         Serial.print(String(forecast.days[i].day) + ", ");
@@ -118,13 +123,13 @@ int *getKnotsNext12h(int currentDay, int currentHour)
     int currentHourIndex = 0;
     for (int i = 0; i < NUM_DAYS; i++)
     {
-        //int day;
-        //sscanf(forecast.days[i].date, "%*[^,], %*s %d", &day);
+        // int day;
+        // sscanf(forecast.days[i].date, "%*[^,], %*s %d", &day);
         for (int j = 0; j < NUM_HOURS; j++)
         {
             knotsAllHours[allHoursIndex] = forecast.days[i].hours[j].windspeed;
-            //Serial.println("CurrentDay = " + String(currentDay) + ", CurrentHour = " + String(currentHour));
-            //Serial.println("ForecastDay = " + String(forecast.days[i].day) + ", ForecastHour = " + String(forecast.days[i].hours[j].hour));
+            // Serial.println("CurrentDay = " + String(currentDay) + ", CurrentHour = " + String(currentHour));
+            // Serial.println("ForecastDay = " + String(forecast.days[i].day) + ", ForecastHour = " + String(forecast.days[i].hours[j].hour));
             if (currentDay == forecast.days[i].day && currentHour == forecast.days[i].hours[j].hour)
             {
                 currentHourIndex = allHoursIndex;
@@ -146,7 +151,7 @@ int *getKnotsNext12h(int currentDay, int currentHour)
     Serial.println();
 
     Serial.println("CurrentDay = " + String(currentDay) + ", CurrentHour = " + String(currentHour));
-    //Serial.println("currentHourIndex = " + String(currentHourIndex));
+    // Serial.println("currentHourIndex = " + String(currentHourIndex));
 
     Serial.print(F("knotsNext12Hours:\t"));
     for (int i = 0; i < 12; i++)
