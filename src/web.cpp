@@ -6,7 +6,7 @@
 #include "update.h"
 #include "timekeeper.h"
 
-#define PORTAL_TIMEOUT_SEC 30
+#define PORTAL_TIMEOUT_SEC 5 * 60
 
 #include "debug.h"
 
@@ -24,33 +24,28 @@ String web_init()
   WiFiManager wm;
 
   wifi_station_set_hostname("Beau4tClock");
+  wm.setHostname("Beau4tClock");
   WiFi.hostname("Beau4tClock");
   WiFi.setHostname("Beau4tClock");
 
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP //WIFI_AP_STA
   wm.setDebugOutput(true);
   // wm.resetSettings();
-  wm.setConfigPortalTimeout(PORTAL_TIMEOUT_SEC);
 
-  bool res = wm.autoConnect("Beau4tClock", "12345678");
-  if (res == 0)
+  if (!wm.autoConnect("Beau4tClock", "12345678"))
   {
-    Serial.println(F("Failed to connect with known credentials."));
-  }
-
-  if (!wm.startConfigPortal("Beau4tClock", "12345678"))
-  {
-    Serial.println(F("failed to connect and hit timeout"));
-    delay(3000);
-    if (res == 0)
+    wm.setConfigPortalTimeout(PORTAL_TIMEOUT_SEC);
+    if (!wm.startConfigPortal("Beau4tClock", "12345678"))
     {
-      ESP.restart();
+      if (!WiFi.isConnected())
+      {
+        Serial.println(F("Portal timed out, and no valid WiFi configuration to connect to."));
+        Serial.println(F("Rebooting . . . "));
+        delay(3000);
+        ESP.restart();
+      }
     }
   }
-
-  wifi_station_set_hostname("Beau4tClock");
-  WiFi.hostname("Beau4tClock");
-  WiFi.setHostname("Beau4tClock");
 
   Serial.println(F("\n\nconnected..."));
   Serial.print(F("Hostname: "));
@@ -154,11 +149,13 @@ void server_init()
   server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request)
             {
               request->send(200, "text/plain", "OK"); 
-            updateFirmware(); 
-            updateFileSystem(); });
+              updateFirmware(); 
+             updateFileSystem(); });
 
   server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request)
-            { Serial.println("/reset received");
+            { 
+              Serial.println("/reset received");
+              digitalWrite(0, LOW); //trigger RST //@todo doesnt trigger reeset function. 
             request->send(200, "text/plain", "OK"); });
 
   server.onNotFound(notFound);
@@ -206,7 +203,8 @@ void web_process()
   wm.process();
 }
 
-void reset_web(){
+void reset_web()
+{
   WiFi.disconnect(true);
   wm.resetSettings();
 

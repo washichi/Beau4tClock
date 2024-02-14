@@ -157,8 +157,8 @@ void updateClock()
   ////  newValue = (newValueMax - newValueMin) * (value - valueMin) / (valueMax - valueMin) + newValueMin;
   int current12hTimeInMinutes = ((currentHour % 12) * 60) + currentMinute;
   // old int ledIndexHour = floor(((NUM_LEDS - 1) * current12hTimeInMinutes) / 719);
-  int ledIndexHour = round(((currentHour-1 % 12) * LEDS_PER_HOUR)) - 2;
-  // int ledIndexHour = ((((currentHour % 12) + 1) * LEDS_PER_HOUR) - 2);
+  int ledIndexHour = ((((currentHour % 12) + 1) * LEDS_PER_HOUR) - 2);
+  Serial.println("ledIndexHour: " + String(ledIndexHour));
   //// int ledIndexMinute = round(currentMinute * (NUM_LEDS-1) / 59) - 1;
   int ledIndexMinute = floor(((NUM_LEDS - 1) * currentMinute) / 59);
   leds[ledIndexHour] = CRGB::White;

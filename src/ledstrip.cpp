@@ -59,7 +59,6 @@ const char *colorMap[] = {
     "0x98003C",  // 49
     "0xA00050"}; // 50
 
-
 void updateBrightness()
 {
   if (isDaytime() == true)
@@ -98,6 +97,7 @@ void blinkIP(String ipAddress)
   {
     FastLED.clear();
     FastLED.show();
+    FastLED.show();
     delay(500);
 
     if (x == '.')
@@ -108,11 +108,19 @@ void blinkIP(String ipAddress)
       }
       FastLED.setBrightness(20);
       FastLED.show();
+      FastLED.show();
     }
     else
     {
-      leds[(int(x - '0') * LEDS_PER_HOUR) - 1] = CRGB::White;
+      int number = int(x - '0');
+      //convert 0 to 10 so hour-10-led will lighten when 0 in ipAddress.
+      if(number == 0)
+      {
+        number = 10;
+      }
+      leds[(number * LEDS_PER_HOUR) - 1] = CRGB::White;
       FastLED.setBrightness(255);
+      FastLED.show();
       FastLED.show();
     }
     delay(blinkDelay * 3);
@@ -165,8 +173,9 @@ void projectForecastColors(int knotsNext12h[])
     Serial.print("\t,ledIndex: " + String(ledIndex));
     Serial.print(",\twindspeed: " + String(knotsNext12h[i]));
     Serial.println();
-    if(knotsNext12h[i] > config.offThreshold){
-        leds[ledIndex] = strtol(colorMap[knotsNext12h[i]], NULL, 0);
+    if (knotsNext12h[i] > config.offThreshold)
+    {
+      leds[ledIndex] = strtol(colorMap[knotsNext12h[i]], NULL, 0);
     }
   }
 }
